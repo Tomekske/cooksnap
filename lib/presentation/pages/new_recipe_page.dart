@@ -39,6 +39,8 @@ class _NewRecipePageState extends State<NewRecipePage> {
   final _imageUrlController = TextEditingController();
   final _tagController = TextEditingController();
 
+  RecipeCategory _selectedCategory = RecipeCategory.mainDish;
+
   final List<String> _tags = [];
 
   final List<StepField> _stepFields = [];
@@ -230,6 +232,30 @@ class _NewRecipePageState extends State<NewRecipePage> {
                       ],
                     ),
                     const SizedBox(height: 16),
+                    _buildLabel("CATEGORY"),
+                    DropdownButtonFormField<RecipeCategory>(
+                      value: _selectedCategory,
+                      decoration: _inputDecoration("Select Category"),
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.grey,
+                      ),
+                      items: RecipeCategory.values.map((category) {
+                        return DropdownMenuItem(
+                          value: category,
+                          child: Text(category.label),
+                        );
+                      }).toList(),
+                      onChanged: (RecipeCategory? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _selectedCategory = newValue;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
                     _buildLabel("IMAGE URL"),
                     TextFormField(
                       controller: _imageUrlController,
@@ -568,7 +594,7 @@ class _NewRecipePageState extends State<NewRecipePage> {
             : _imageUrlController.text,
         cookTime: _cookTimeController.text,
         servings: int.tryParse(_servingsController.text) ?? 1,
-        category: RecipeCategory.mainDish.value,
+        category: _selectedCategory.value,
         tags: _tags,
         ingredients: [], // TODO: Add ingredients input UI
         instructions: _stepFields.map((stepField) {
