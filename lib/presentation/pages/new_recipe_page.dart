@@ -4,12 +4,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/recipe.dart';
 import '../../logic/cubits/cubits.dart';
 
-// Helper class to manage dynamic controllers
 class StepField {
   TextEditingController controller = TextEditingController();
   List<StepField> subSteps = [];
 
   StepField();
+
+  void dispose() {
+    controller.dispose();
+    for (final sub in subSteps) {
+      sub.dispose();
+    }
+  }
 }
 
 class NewRecipePage extends StatefulWidget {
@@ -36,6 +42,21 @@ class _NewRecipePageState extends State<NewRecipePage> {
 
   final List<StepField> _stepFields = [];
 
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _cookTimeController.dispose();
+    _servingsController.dispose();
+    _imageUrlController.dispose();
+    _tagController.dispose();
+
+    for (final step in _stepFields) {
+      step.dispose();
+    }
+
+    super.dispose();
+  }
+
   void _addTag(String val) {
     if (val.isNotEmpty && !_tags.contains(val)) {
       setState(() {
@@ -51,7 +72,6 @@ class _NewRecipePageState extends State<NewRecipePage> {
     });
   }
 
-  // --- Step Logic ---
   void _addMainStep() {
     setState(() {
       _stepFields.add(StepField());
@@ -111,13 +131,14 @@ class _NewRecipePageState extends State<NewRecipePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // AI Generate Banner
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: _lightGreen,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _primaryColor.withOpacity(0.3)),
+                  border: Border.all(
+                    color: _primaryColor.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -155,7 +176,7 @@ class _NewRecipePageState extends State<NewRecipePage> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -365,7 +386,6 @@ class _NewRecipePageState extends State<NewRecipePage> {
                   () => _removeStep(step),
                 ),
                 const SizedBox(height: 4),
-                // "Sec" Button (Secondary/Sub)
                 InkWell(
                   onTap: () => _addSubStepTo(step),
                   child: Container(

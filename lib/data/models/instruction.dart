@@ -4,7 +4,8 @@ class Instruction extends Equatable {
   final String title;
   final List<String> steps;
 
-  const Instruction({required this.title, required this.steps});
+  Instruction({required this.title, required List<String> steps})
+    : steps = List.unmodifiable(steps);
 
   factory Instruction.fromJson(Map<String, dynamic> json) {
     return Instruction(
