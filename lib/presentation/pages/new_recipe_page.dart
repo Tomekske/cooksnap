@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/models/instruction.dart';
 import '../../data/models/recipe.dart';
 import '../../logic/cubits/cubits.dart';
 
@@ -562,12 +563,22 @@ class _NewRecipePageState extends State<NewRecipePage> {
     if (_formKey.currentState!.validate()) {
       final recipe = Recipe(
         title: _titleController.text,
+        coverUrl: _imageUrlController.text.isEmpty
+            ? null
+            : _imageUrlController.text,
         cookTime: _cookTimeController.text,
         servings: int.tryParse(_servingsController.text) ?? 1,
         category: _category,
         tags: _tags,
-        ingredients: [],
-        instructions: [],
+        ingredients: [], // TODO: Add ingredients input UI
+        instructions: _stepFields.map((stepField) {
+          return Instruction(
+            title: stepField.controller.text,
+            steps: stepField.subSteps
+                .map((sub) => sub.controller.text)
+                .toList(),
+          );
+        }).toList(),
       );
 
       context.read<RecipeCubit>().addRecipe(recipe);

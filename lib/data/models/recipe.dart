@@ -5,7 +5,7 @@ import 'instruction.dart';
 class Recipe extends Equatable {
   final String? id;
   final String title;
-  final String? pictureUrl;
+  final String? coverUrl;
   final String cookTime;
   final int servings;
   final String category;
@@ -17,7 +17,7 @@ class Recipe extends Equatable {
   const Recipe({
     this.id,
     required this.title,
-    this.pictureUrl,
+    this.coverUrl,
     required this.cookTime,
     required this.servings,
     required this.category,
@@ -30,7 +30,7 @@ class Recipe extends Equatable {
   Recipe copyWith({
     String? id,
     String? title,
-    String? pictureUrl,
+    String? coverUrl,
     String? cookTime,
     int? servings,
     String? category,
@@ -42,7 +42,7 @@ class Recipe extends Equatable {
     return Recipe(
       id: id ?? this.id,
       title: title ?? this.title,
-      pictureUrl: pictureUrl ?? this.pictureUrl,
+      coverUrl: coverUrl ?? this.coverUrl,
       cookTime: cookTime ?? this.cookTime,
       servings: servings ?? this.servings,
       category: category ?? this.category,
@@ -57,7 +57,7 @@ class Recipe extends Equatable {
     return Recipe(
       id: json['id'] as String?,
       title: json['title'] ?? '',
-      pictureUrl: json['image_url'], // Mapping snake_case from DB
+      coverUrl: json['cover_url'],
       cookTime: json['cook_time'] ?? '',
       servings: json['servings'] ?? 1,
       category: json['category'] ?? 'Other',
@@ -77,7 +77,7 @@ class Recipe extends Equatable {
   Map<String, dynamic> toJson() {
     return {
       'title': title,
-      'image_url': pictureUrl,
+      'cover_url': coverUrl,
       'cook_time': cookTime,
       'servings': servings,
       'category': category,
@@ -91,7 +91,7 @@ class Recipe extends Equatable {
   List<Object?> get props => [
     id,
     title,
-    pictureUrl,
+    coverUrl,
     cookTime,
     servings,
     category,

@@ -74,7 +74,7 @@ class HomePage extends StatelessWidget {
                   },
                   onLongPress: () => _showDeleteDialog(context, recipe),
                   child: RecipeCard(
-                    picture: recipe.pictureUrl,
+                    picture: recipe.coverUrl,
                     title: recipe.title,
                     preparation: recipe.cookTime,
                     category: recipe.category,
