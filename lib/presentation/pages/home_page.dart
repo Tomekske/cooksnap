@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/models/recipe_model.dart';
+import '../../data/models/recipe.dart';
 import '../../logic/cubits/cubits.dart';
 import '../widgets/recipe_card.dart';
 

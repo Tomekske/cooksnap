@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/models/recipe_model.dart';
+import '../../data/models/recipe.dart';
 import '../../logic/cubits/cubits.dart';
+
+// Helper class to manage dynamic controllers
+class StepField {
+  TextEditingController controller = TextEditingController();
+  List<StepField> subSteps = [];
+
+  StepField();
+}
 
 class NewRecipePage extends StatefulWidget {
   const NewRecipePage({super.key});
@@ -26,8 +34,7 @@ class _NewRecipePageState extends State<NewRecipePage> {
   String _category = "Main Dish";
   final List<String> _tags = [];
 
-  final List<String> _ingredients = [];
-  final List<Direction> _directions = [];
+  final List<StepField> _stepFields = [];
 
   void _addTag(String val) {
     if (val.isNotEmpty && !_tags.contains(val)) {
@@ -41,6 +48,41 @@ class _NewRecipePageState extends State<NewRecipePage> {
   void _removeTag(String tag) {
     setState(() {
       _tags.remove(tag);
+    });
+  }
+
+  // --- Step Logic ---
+  void _addMainStep() {
+    setState(() {
+      _stepFields.add(StepField());
+    });
+  }
+
+  void _addSubStepToLast() {
+    if (_stepFields.isNotEmpty) {
+      setState(() {
+        _stepFields.last.subSteps.add(StepField());
+      });
+    } else {
+      _addMainStep();
+    }
+  }
+
+  void _addSubStepTo(StepField parent) {
+    setState(() {
+      parent.subSteps.add(StepField());
+    });
+  }
+
+  void _removeStep(StepField step) {
+    setState(() {
+      _stepFields.remove(step);
+    });
+  }
+
+  void _removeSubStep(StepField parent, StepField child) {
+    setState(() {
+      parent.subSteps.remove(child);
     });
   }
 
@@ -69,6 +111,7 @@ class _NewRecipePageState extends State<NewRecipePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // AI Generate Banner
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -131,7 +174,6 @@ class _NewRecipePageState extends State<NewRecipePage> {
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 16),
-
                     Row(
                       children: [
                         Expanded(
@@ -143,15 +185,7 @@ class _NewRecipePageState extends State<NewRecipePage> {
                               TextFormField(
                                 controller: _cookTimeController,
                                 keyboardType: TextInputType.number,
-                                decoration: _inputDecoration("30").copyWith(
-                                  suffixIcon: const Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.arrow_drop_up, size: 18),
-                                      Icon(Icons.arrow_drop_down, size: 18),
-                                    ],
-                                  ),
-                                ),
+                                decoration: _inputDecoration("30"),
                               ),
                             ],
                           ),
@@ -174,103 +208,31 @@ class _NewRecipePageState extends State<NewRecipePage> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     _buildLabel("IMAGE URL"),
                     TextFormField(
                       controller: _imageUrlController,
                       decoration: _inputDecoration("https://..."),
                     ),
                     const SizedBox(height: 16),
-
-                    // Category
-                    _buildLabel("CATEGORY"),
-                    DropdownButtonFormField<String>(
-                      value: _category,
-                      decoration: _inputDecoration("Select Category"),
-                      icon: const Icon(Icons.keyboard_arrow_down),
-                      items:
-                          [
-                                "Appetizer",
-                                "Breakfast",
-                                "Dessert",
-                                "Drinks",
-                                "Main Dish",
-                                "Side Dish",
-                                "Snacks",
-                                "Other",
-                              ]
-                              .map(
-                                (c) =>
-                                    DropdownMenuItem(value: c, child: Text(c)),
-                              )
-                              .toList(),
-                      onChanged: (v) => setState(() => _category = v!),
-                    ),
-                    const SizedBox(height: 16),
-
                     _buildLabel("TAGS"),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _tagController,
-                            decoration: _inputDecoration(
-                              "Add tag (e.g. Healthy)...",
-                            ),
-                            onFieldSubmitted: _addTag,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        InkWell(
-                          onTap: () => _addTag(_tagController.text),
-                          child: Container(
-                            height: 50,
-                            width: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(Icons.add),
-                          ),
-                        ),
-                      ],
+                    TextFormField(
+                      controller: _tagController,
+                      decoration: _inputDecoration("Add tag..."),
+                      onFieldSubmitted: _addTag,
                     ),
-
-                    if (_tags.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: _tags
-                            .map(
-                              (tag) => Chip(
-                                label: Text(tag),
-                                backgroundColor: _lightGreen,
-                                labelStyle: TextStyle(color: _primaryColor),
-                                deleteIcon: Icon(
-                                  Icons.close,
-                                  size: 14,
-                                  color: _primaryColor,
-                                ),
-                                onDeleted: () => _removeTag(tag),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                side: BorderSide.none,
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ] else
+                    if (_tags.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          "No tags added. Auto-tags will be generated on save.",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[400],
-                            fontStyle: FontStyle.italic,
-                          ),
+                        child: Wrap(
+                          spacing: 8,
+                          children: _tags
+                              .map(
+                                (t) => Chip(
+                                  label: Text(t),
+                                  onDeleted: () => _removeTag(t),
+                                ),
+                              )
+                              .toList(),
                         ),
                       ),
                   ],
@@ -300,35 +262,57 @@ class _NewRecipePageState extends State<NewRecipePage> {
                         Row(
                           children: [
                             _buildStepButton(
-                              Icons.auto_fix_high,
-                              "Polish",
-                              Colors.purple.shade50,
-                              Colors.purple,
+                              icon: Icons.auto_fix_high,
+                              label: "Polish",
+                              bg: Colors.purple.shade50,
+                              fg: Colors.purple,
+                              onTap: () {}, // Polish logic
                             ),
                             const SizedBox(width: 8),
                             _buildStepButton(
-                              Icons.add,
-                              "Main",
-                              _lightGreen,
-                              _primaryColor,
+                              icon: Icons.add,
+                              label: "Main",
+                              bg: _lightGreen,
+                              fg: _primaryColor,
+                              onTap: _addMainStep,
                             ),
                             const SizedBox(width: 8),
                             _buildStepButton(
-                              Icons.add,
-                              "Sub",
-                              Colors.grey.shade100,
-                              Colors.grey.shade700,
+                              icon: Icons.add,
+                              label: "Sub",
+                              bg: Colors.grey.shade100,
+                              fg: Colors.grey.shade700,
+                              onTap: _addSubStepToLast,
                             ),
                           ],
                         ),
                       ],
                     ),
+                    const SizedBox(height: 16),
+
+                    if (_stepFields.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Text(
+                          "No steps added yet.",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      )
+                    else
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _stepFields.length,
+                        itemBuilder: (context, index) {
+                          return _buildStepItem(_stepFields[index], index);
+                        },
+                      ),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
 
-              // 4. Save Button
+              // Save Button
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -339,7 +323,6 @@ class _NewRecipePageState extends State<NewRecipePage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    elevation: 2,
                   ),
                   child: const Text(
                     "Save Recipe",
@@ -354,6 +337,165 @@ class _NewRecipePageState extends State<NewRecipePage> {
               const SizedBox(height: 40),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepItem(StepField step, int index) {
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: step.controller,
+                maxLines: null,
+                decoration: _inputDecoration("Main Step instruction..."),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              children: [
+                _buildIconButton(
+                  Icons.delete_outline,
+                  Colors.red.shade50,
+                  Colors.red.shade300,
+                  () => _removeStep(step),
+                ),
+                const SizedBox(height: 4),
+                // "Sec" Button (Secondary/Sub)
+                InkWell(
+                  onTap: () => _addSubStepTo(step),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      "Sec",
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        if (step.subSteps.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, bottom: 12.0),
+            child: Container(
+              decoration: const BoxDecoration(
+                border: Border(left: BorderSide(color: Colors.grey, width: 1)),
+              ),
+              padding: const EdgeInsets.only(left: 12),
+              child: Column(
+                children: step.subSteps.map((subStep) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: subStep.controller,
+                            decoration: _inputDecoration("Sub-step detail...")
+                                .copyWith(
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black87,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          children: [
+                            _buildIconButton(
+                              Icons.delete_outline,
+                              Colors.red.shade50,
+                              Colors.red.shade300,
+                              () => _removeSubStep(step, subStep),
+                            ),
+                            const SizedBox(height: 4),
+                            // Sub-steps usually don't have their own sub-steps in this UI,
+                            // but we keep spacing consistent
+                            const SizedBox(height: 32),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildIconButton(
+    IconData icon,
+    Color bg,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, size: 16, color: iconColor),
+      ),
+    );
+  }
+
+  Widget _buildStepButton({
+    required IconData icon,
+    required String label,
+    required Color bg,
+    required Color fg,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 14, color: fg),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: fg,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -378,7 +520,7 @@ class _NewRecipePageState extends State<NewRecipePage> {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(color: Colors.grey[400]),
-      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: Colors.grey.shade300),
@@ -396,30 +538,6 @@ class _NewRecipePageState extends State<NewRecipePage> {
     );
   }
 
-  Widget _buildStepButton(IconData icon, String label, Color bg, Color fg) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 14, color: fg),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: fg,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _saveRecipe() {
     if (_formKey.currentState!.validate()) {
       final recipe = Recipe(
@@ -428,11 +546,8 @@ class _NewRecipePageState extends State<NewRecipePage> {
         servings: int.tryParse(_servingsController.text) ?? 1,
         category: _category,
         tags: _tags,
-        // Since image URL and Directions were not in original model constructor in the provided snippet,
-        // we might need to adjust or they might be optional.
-        // Assuming the Recipe model can take ingredients from existing lists or new structure.
-        ingredients: _ingredients,
-        directions: _directions,
+        ingredients: [],
+        instructions: [],
       );
 
       context.read<RecipeCubit>().addRecipe(recipe);

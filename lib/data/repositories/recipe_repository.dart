@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../models/recipe_model.dart';
+import '../models/instruction.dart';
+import '../models/recipe.dart';
 
 // Handles low-level DB connection
 class SupabaseService {
@@ -35,9 +36,9 @@ class RecipeRepositoryImpl implements RecipeRepository {
       category: 'Main Dish',
       tags: ['Italian', 'Pasta'],
       ingredients: ['Spaghetti', 'Eggs', 'Pancetta', 'Parmesan'],
-      directions: [
-        Direction(title: 'Prep', steps: ['Boil water', 'Chop pancetta']),
-        Direction(
+      instructions: [
+        Instruction(title: 'Prep', steps: ['Boil water', 'Chop pancetta']),
+        Instruction(
           title: 'Cook',
           steps: ['Cook pasta', 'Fry pancetta', 'Mix with eggs'],
         ),
