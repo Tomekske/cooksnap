@@ -146,10 +146,6 @@ class HomePage extends StatelessWidget {
               // Logout logic
             },
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text("dev.133", style: TextStyle(color: Colors.grey[400])),
-          ),
         ],
       ),
     );
@@ -168,8 +164,17 @@ class HomePage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              context.read<RecipeCubit>().deleteRecipe(recipe.id!);
-              Navigator.pop(ctx);
+              if (recipe.id != null) {
+                context.read<RecipeCubit>().deleteRecipe(recipe.id!);
+                Navigator.pop(ctx);
+              } else {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Cannot delete recipe: missing ID"),
+                  ),
+                );
+              }
             },
             child: const Text("Delete", style: TextStyle(color: Colors.red)),
           ),

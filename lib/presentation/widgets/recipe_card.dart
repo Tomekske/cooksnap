@@ -31,7 +31,18 @@ class RecipeCard extends StatelessWidget {
               width: double.infinity,
               child: picture != null && picture!.isNotEmpty
                   ? (Uri.tryParse(picture!)?.isAbsolute == true
-                        ? Image.network(picture!, fit: BoxFit.cover)
+                        ? Image.network(
+                            picture!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (c, e, s) =>
+                                const Center(child: Icon(Icons.broken_image)),
+                            loadingBuilder: (c, child, progress) =>
+                                progress == null
+                                ? child
+                                : const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                          )
                         : Image.file(
                             File(picture!),
                             fit: BoxFit.cover,
