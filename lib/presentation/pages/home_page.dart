@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/models/recipe_model.dart';
+import '../../data/models/recipe.dart';
 import '../../logic/cubits/cubits.dart';
 import '../widgets/recipe_card.dart';
 
@@ -74,7 +74,7 @@ class HomePage extends StatelessWidget {
                   },
                   onLongPress: () => _showDeleteDialog(context, recipe),
                   child: RecipeCard(
-                    picture: recipe.pictureUrl,
+                    picture: recipe.coverUrl,
                     title: recipe.title,
                     preparation: recipe.cookTime,
                     category: recipe.category,
