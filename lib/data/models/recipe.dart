@@ -3,16 +3,15 @@ import 'package:equatable/equatable.dart';
 import 'instruction.dart';
 
 class Recipe extends Equatable {
-  final String? id;
+  final int? id;
   final String title;
   final String? coverUrl;
   final String cookTime;
   final int servings;
-  final String category;
+  final int category;
   final List<String> tags;
   final List<String> ingredients;
   final List<Instruction> instructions;
-  final DateTime? createdAt;
 
   const Recipe({
     this.id,
@@ -24,20 +23,18 @@ class Recipe extends Equatable {
     required this.tags,
     required this.ingredients,
     required this.instructions,
-    this.createdAt,
   });
 
   Recipe copyWith({
-    String? id,
+    int? id,
     String? title,
     String? coverUrl,
     String? cookTime,
     int? servings,
-    String? category,
+    int? category,
     List<String>? tags,
     List<String>? ingredients,
     List<Instruction>? instructions,
-    DateTime? createdAt,
   }) {
     return Recipe(
       id: id ?? this.id,
@@ -49,18 +46,17 @@ class Recipe extends Equatable {
       tags: tags ?? this.tags,
       ingredients: ingredients ?? this.ingredients,
       instructions: instructions ?? this.instructions,
-      createdAt: createdAt ?? this.createdAt,
     );
   }
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
-      id: json['id'] as String?,
+      id: json['id'] as int?,
       title: json['title'] ?? '',
       coverUrl: json['cover_url'],
       cookTime: json['cook_time'] ?? '',
       servings: json['servings'] ?? 1,
-      category: json['category'] ?? 'Other',
+      category: (json['category'] is int) ? json['category'] : 11,
       tags: List<String>.from(json['tags'] ?? []),
       ingredients: List<String>.from(json['ingredients'] ?? []),
       instructions:
@@ -68,9 +64,6 @@ class Recipe extends Equatable {
               ?.map((e) => Instruction.fromJson(e))
               .toList() ??
           [],
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : null,
     );
   }
 

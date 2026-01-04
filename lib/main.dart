@@ -3,41 +3,31 @@ import 'package:cooksnap/presentation/pages/new_recipe_page.dart';
 import 'package:cooksnap/presentation/pages/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Import our layers;
-import 'data/repositories/recipe_repository.dart';
+import 'core/core.dart';
+import 'data/repositories/supabase_repository.dart';
+import 'data/services/storage_service.dart';
 import 'logic/cubits/cubits.dart';
+import 'logic/cubits/recipe/recipe_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // --- SUPABASE SETUP ---
-  // Note: Even if you don't connect, Supabase.initialize needs url/anonKey to compile if you check them.
-  // For the prototype 'Mock' mode, we can skip actual initialization or provide dummy strings.
-  // Uncomment and fill these when ready to connect real data.
-  /*
-  await Supabase.initialize(
-    url: 'YOUR_SUPABASE_URL',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',
-  );
-  */
+  await Config.load();
 
-  final mockSupabaseClient = SupabaseClient(
-    'https://mock.supabase.co',
-    'mockKey',
-  );
+  // Initialize dependencies
+  final remoteRepo = SupabaseRepository();
+  final service = StorageService(remoteRepo);
 
-  final supabaseService = SupabaseService(mockSupabaseClient);
-  final recipeRepository = RecipeRepositoryImpl(supabaseService);
-
-  runApp(CooksnapApp(recipeRepository: recipeRepository));
+  runApp(CooksnapApp(storageService: service));
 }
 
 class CooksnapApp extends StatelessWidget {
-  final RecipeRepository recipeRepository;
+  final StorageService _storageService;
 
-  const CooksnapApp({super.key, required this.recipeRepository});
+  const CooksnapApp({super.key, required StorageService storageService})
+    : _storageService = storageService;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +35,7 @@ class CooksnapApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => ThemeCubit()),
         BlocProvider(
-          create: (context) => RecipeCubit(recipeRepository)..loadRecipes(),
+          create: (context) => RecipeCubit(_storageService)..loadRecipes(),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(

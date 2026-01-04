@@ -50,3 +50,7 @@ app.*.map.json
 *.jks
 local.properties
 **/.cxx/
+
+.env.dev
+
+.env.prd

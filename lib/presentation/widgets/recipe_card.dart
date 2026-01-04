@@ -2,19 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-class RecipeCard extends StatelessWidget {
-  final String? picture;
-  final String title;
-  final String preparation;
-  final String category;
+import '../../data/enums/recipe_category.dart';
+import '../../data/models/recipe.dart';
 
-  const RecipeCard({
-    super.key,
-    required this.picture,
-    required this.title,
-    required this.preparation,
-    required this.category,
-  });
+class RecipeCard extends StatelessWidget {
+  final Recipe recipe;
+
+  const RecipeCard({super.key, required this.recipe});
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +23,10 @@ class RecipeCard extends StatelessWidget {
             flex: 3,
             child: SizedBox(
               width: double.infinity,
-              child: picture != null && picture!.isNotEmpty
-                  ? (Uri.tryParse(picture!)?.isAbsolute == true
+              child: recipe.coverUrl != null && recipe.coverUrl!.isNotEmpty
+                  ? (Uri.tryParse(recipe.coverUrl!)?.isAbsolute == true
                         ? Image.network(
-                            picture!,
+                            recipe.coverUrl!,
                             fit: BoxFit.cover,
                             errorBuilder: (c, e, s) =>
                                 const Center(child: Icon(Icons.broken_image)),
@@ -44,7 +38,7 @@ class RecipeCard extends StatelessWidget {
                                   ),
                           )
                         : Image.file(
-                            File(picture!),
+                            File(recipe.coverUrl!),
                             fit: BoxFit.cover,
                             errorBuilder: (c, e, s) =>
                                 const Center(child: Icon(Icons.broken_image)),
@@ -68,7 +62,7 @@ class RecipeCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    title,
+                    recipe.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -81,7 +75,7 @@ class RecipeCard extends StatelessWidget {
                       const Icon(Icons.timer, size: 14, color: Colors.grey),
                       const SizedBox(width: 4),
                       Text(
-                        preparation,
+                        recipe.cookTime,
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -90,7 +84,7 @@ class RecipeCard extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    category,
+                    RecipeCategory.fromValue(recipe.category).label,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],

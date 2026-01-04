@@ -1,9 +1,10 @@
+import 'package:cooksnap/data/enums/recipe_category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/instruction.dart';
 import '../../data/models/recipe.dart';
-import '../../logic/cubits/cubits.dart';
+import '../../logic/cubits/recipe/recipe_cubit.dart';
 
 class StepField {
   TextEditingController controller = TextEditingController();
@@ -38,7 +39,6 @@ class _NewRecipePageState extends State<NewRecipePage> {
   final _imageUrlController = TextEditingController();
   final _tagController = TextEditingController();
 
-  String _category = "Main Dish";
   final List<String> _tags = [];
 
   final List<StepField> _stepFields = [];
@@ -568,7 +568,7 @@ class _NewRecipePageState extends State<NewRecipePage> {
             : _imageUrlController.text,
         cookTime: _cookTimeController.text,
         servings: int.tryParse(_servingsController.text) ?? 1,
-        category: _category,
+        category: RecipeCategory.mainDish.value,
         tags: _tags,
         ingredients: [], // TODO: Add ingredients input UI
         instructions: _stepFields.map((stepField) {

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/recipe.dart';
-import '../../logic/cubits/cubits.dart';
+import '../../logic/cubits/recipe/recipe_cubit.dart';
+import '../../logic/cubits/recipe/recipe_state.dart';
 import '../widgets/recipe_card.dart';
 
 class HomePage extends StatelessWidget {
@@ -60,7 +61,7 @@ class HomePage extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.8, // Adjust for card height
+                childAspectRatio: 0.8,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
               ),
@@ -69,16 +70,11 @@ class HomePage extends StatelessWidget {
                 final recipe = state.recipes[index];
                 return GestureDetector(
                   onTap: () {
-                    // Navigate to details (Preview Mode)
+                    // TODO
                     // Navigator.pushNamed(context, '/displayRecipe', arguments: recipe);
                   },
                   onLongPress: () => _showDeleteDialog(context, recipe),
-                  child: RecipeCard(
-                    picture: recipe.coverUrl,
-                    title: recipe.title,
-                    preparation: recipe.cookTime,
-                    category: recipe.category,
-                  ),
+                  child: RecipeCard(recipe: recipe),
                 );
               },
             );
@@ -122,7 +118,7 @@ class HomePage extends StatelessWidget {
                     style: TextStyle(
                       color: Theme.of(
                         context,
-                      ).colorScheme.onPrimary.withOpacity(0.8),
+                      ).colorScheme.onPrimary.withValues(alpha: 0.8),
                       fontSize: 14,
                     ),
                   ),
